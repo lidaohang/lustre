@@ -734,6 +734,7 @@ static void osc_io_data_version_end(const struct lu_env *env,
 static int osc_io_read_start(const struct lu_env *env,
                              const struct cl_io_slice *slice)
 {
+    struct timespec64 ts;
 	struct cl_object *obj  = slice->cis_obj;
 	struct cl_attr	 *attr = &osc_env_info(env)->oti_attr;
 	int rc = 0;
@@ -741,7 +742,9 @@ static int osc_io_read_start(const struct lu_env *env,
 
 	if (!slice->cis_io->ci_noatime) {
 		cl_object_attr_lock(obj);
-		attr->cat_atime = ktime_get_real_seconds();
+
+        ktime_get_real_ts64(&ts);
+		attr->cat_atime = LTIME_N(ts);
 		rc = cl_object_attr_update(env, obj, attr, CAT_ATIME);
 		cl_object_attr_unlock(obj);
 	}
