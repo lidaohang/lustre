@@ -1,0 +1,559 @@
+diff -uNr lustre-release/lustre/include/cl_object.h lustre-release-new/lustre/include/cl_object.h
+--- lustre-release/lustre/include/cl_object.h	2019-09-19 11:50:33.860342821 +0800
++++ lustre-release-new/lustre/include/cl_object.h	2019-09-19 11:55:30.196542408 +0800
+@@ -146,11 +146,11 @@
+          * This is only valid when at least one DLM lock is held.
+          */
+         loff_t cat_kms;
+-        /** Modification time. Measured in seconds since epoch. */
++        /** Modification time. Measured in nanoseconds since epoch. */
+         time64_t cat_mtime;
+-        /** Access time. Measured in seconds since epoch. */
++        /** Access time. Measured in nanoseconds since epoch. */
+         time64_t cat_atime;
+-        /** Change time. Measured in seconds since epoch. */
++        /** Change time. Measured in nanoseconds since epoch. */
+         time64_t cat_ctime;
+         /**
+          * Blocks allocated to this cl_object on the server file system.
+diff -uNr lustre-release/lustre/include/lu_object.h lustre-release-new/lustre/include/lu_object.h
+--- lustre-release/lustre/include/lu_object.h	2019-09-19 11:50:33.862342829 +0800
++++ lustre-release-new/lustre/include/lu_object.h	2019-09-19 11:55:31.551547894 +0800
+@@ -400,11 +400,11 @@
+ 	__u64          la_valid;
+         /** size in bytes */
+         __u64          la_size;
+-	/** modification time in seconds since Epoch */
++	/** modification time in nanoseconds since Epoch */
+ 	s64		la_mtime;
+-	/** access time in seconds since Epoch */
++	/** access time in nanoseconds since Epoch */
+ 	s64		la_atime;
+-	/** change time in seconds since Epoch */
++	/** change time in nanoseconds since Epoch */
+ 	s64		la_ctime;
+         /** 512-byte blocks allocated to object */
+         __u64          la_blocks;
+diff -uNr lustre-release/lustre/include/lustre_compat.h lustre-release-new/lustre/include/lustre_compat.h
+--- lustre-release/lustre/include/lustre_compat.h	2019-09-19 11:50:33.866342845 +0800
++++ lustre-release-new/lustre/include/lustre_compat.h	2019-09-19 11:55:32.446551517 +0800
+@@ -94,6 +94,8 @@
+ 
+ #define LTIME_S(time)                   (time.tv_sec)
+ 
++#define LTIME_N(time)                   (time.tv_nsec)
++
+ #ifdef HAVE_GENERIC_PERMISSION_2ARGS
+ # define ll_generic_permission(inode, mask, flags, check_acl) \
+ 	 generic_permission(inode, mask)
+diff -uNr lustre-release/lustre/lfsck/lfsck_lib.c lustre-release-new/lustre/lfsck/lfsck_lib.c
+--- lustre-release/lustre/lfsck/lfsck_lib.c	2019-09-19 11:50:33.903342995 +0800
++++ lustre-release-new/lustre/lfsck/lfsck_lib.c	2019-09-19 11:55:33.266554836 +0800
+@@ -1051,7 +1051,7 @@
+ 	}
+ 
+ 	memset(la, 0, sizeof(*la));
+-	la->la_atime = la->la_mtime = la->la_ctime = cfs_time_current_sec();
++	la->la_atime = la->la_mtime = la->la_ctime = LTIME_N(CURRENT_TIME);
+ 	la->la_mode = S_IFDIR | S_IRWXU;
+ 	la->la_valid = LA_ATIME | LA_MTIME | LA_CTIME | LA_MODE |
+ 		       LA_UID | LA_GID;
+diff -uNr lustre-release/lustre/lfsck/lfsck_namespace.c lustre-release-new/lustre/lfsck/lfsck_namespace.c
+--- lustre-release/lustre/lfsck/lfsck_namespace.c	2019-09-19 11:50:33.905343003 +0800
++++ lustre-release-new/lustre/lfsck/lfsck_namespace.c	2019-09-19 11:55:34.057558038 +0800
+@@ -1007,7 +1007,7 @@
+ 	}
+ 
+ 	memset(la, 0, sizeof(*la));
+-	la->la_ctime = cfs_time_current_sec();
++	la->la_ctime = LTIME_N(CURRENT_TIME);
+ 	la->la_valid = LA_CTIME;
+ 	rc = dt_declare_attr_set(env, orphan, la, th);
+ 	if (rc != 0)
+@@ -1168,7 +1168,7 @@
+ 	}
+ 
+ 	memset(la, 0, sizeof(*la));
+-	la->la_ctime = cfs_time_current_sec();
++	la->la_ctime = LTIME_N(CURRENT_TIME);
+ 	la->la_valid = LA_CTIME;
+ 	rc = dt_declare_attr_set(env, parent, la, th);
+ 	if (rc != 0)
+@@ -1195,7 +1195,7 @@
+ 			GOTO(stop, rc);
+ 	}
+ 
+-	la->la_ctime = cfs_time_current_sec();
++	la->la_ctime = LTIME_N(CURRENT_TIME);
+ 	rc = dt_attr_set(env, parent, la, th);
+ 	if (rc != 0)
+ 		GOTO(stop, rc);
+diff -uNr lustre-release/lustre/llite/file.c lustre-release-new/lustre/llite/file.c
+--- lustre-release/lustre/llite/file.c	2019-09-19 11:50:33.908343015 +0800
++++ lustre-release-new/lustre/llite/file.c	2019-09-19 11:55:34.804561062 +0800
+@@ -1009,16 +1009,16 @@
+ 	 * All in all, the atime in Lustre does not strictly comply with
+ 	 * POSIX. Solving this problem needs to send an RPC to MDT for each
+ 	 * read, this will hurt performance. */
+-	if (LTIME_S(inode->i_atime) < lli->lli_atime || lli->lli_update_atime) {
+-		LTIME_S(inode->i_atime) = lli->lli_atime;
++	if (LTIME_N(inode->i_atime) < lli->lli_atime || lli->lli_update_atime) {
++		LTIME_N(inode->i_atime) = lli->lli_atime;
+ 		lli->lli_update_atime = 0;
+ 	}
+-	LTIME_S(inode->i_mtime) = lli->lli_mtime;
+-	LTIME_S(inode->i_ctime) = lli->lli_ctime;
++	LTIME_N(inode->i_mtime) = lli->lli_mtime;
++	LTIME_N(inode->i_ctime) = lli->lli_ctime;
+ 
+-	atime = LTIME_S(inode->i_atime);
+-	mtime = LTIME_S(inode->i_mtime);
+-	ctime = LTIME_S(inode->i_ctime);
++	atime = LTIME_N(inode->i_atime);
++	mtime = LTIME_N(inode->i_mtime);
++	ctime = LTIME_N(inode->i_ctime);
+ 
+ 	cl_object_attr_lock(obj);
+ 	rc = cl_object_attr_get(env, obj, attr);
+@@ -1042,9 +1042,9 @@
+ 	i_size_write(inode, attr->cat_size);
+ 	inode->i_blocks = attr->cat_blocks;
+ 
+-	LTIME_S(inode->i_atime) = atime;
+-	LTIME_S(inode->i_mtime) = mtime;
+-	LTIME_S(inode->i_ctime) = ctime;
++	LTIME_N(inode->i_atime) = atime;
++	LTIME_N(inode->i_mtime) = mtime;
++	LTIME_N(inode->i_ctime) = ctime;
+ 
+ out_size_unlock:
+ 	ll_inode_size_unlock(inode);
+@@ -3758,9 +3758,9 @@
+ 				RETURN(rc);
+ 		}
+ 
+-		LTIME_S(inode->i_atime) = ll_i2info(inode)->lli_atime;
+-		LTIME_S(inode->i_mtime) = ll_i2info(inode)->lli_mtime;
+-		LTIME_S(inode->i_ctime) = ll_i2info(inode)->lli_ctime;
++		LTIME_N(inode->i_atime) = ll_i2info(inode)->lli_atime;
++		LTIME_N(inode->i_mtime) = ll_i2info(inode)->lli_mtime;
++		LTIME_N(inode->i_ctime) = ll_i2info(inode)->lli_ctime;
+ 	} else {
+ 		/* In case of restore, the MDT has the right size and has
+ 		 * already send it back without granting the layout lock,
+diff -uNr lustre-release/lustre/llite/lcommon_cl.c lustre-release-new/lustre/llite/lcommon_cl.c
+--- lustre-release/lustre/llite/lcommon_cl.c	2019-09-19 11:50:33.909343019 +0800
++++ lustre-release-new/lustre/llite/lcommon_cl.c	2019-09-19 11:55:35.506563904 +0800
+@@ -86,9 +86,9 @@
+ 	io->ci_obj = obj;
+ 	io->ci_verify_layout = 1;
+ 
+-	io->u.ci_setattr.sa_attr.lvb_atime = LTIME_S(attr->ia_atime);
+-	io->u.ci_setattr.sa_attr.lvb_mtime = LTIME_S(attr->ia_mtime);
+-	io->u.ci_setattr.sa_attr.lvb_ctime = LTIME_S(attr->ia_ctime);
++	io->u.ci_setattr.sa_attr.lvb_atime = LTIME_N(attr->ia_atime);
++	io->u.ci_setattr.sa_attr.lvb_mtime = LTIME_N(attr->ia_mtime);
++	io->u.ci_setattr.sa_attr.lvb_ctime = LTIME_N(attr->ia_ctime);
+ 	io->u.ci_setattr.sa_attr.lvb_size = attr->ia_size;
+ 	io->u.ci_setattr.sa_attr_flags = attr_flags;
+ 	io->u.ci_setattr.sa_valid = attr->ia_valid;
+diff -uNr lustre-release/lustre/llite/llite_lib.c lustre-release-new/lustre/llite/llite_lib.c
+--- lustre-release/lustre/llite/llite_lib.c	2019-09-19 11:50:33.911343027 +0800
++++ lustre-release-new/lustre/llite/llite_lib.c	2019-09-19 11:55:36.272567005 +0800
+@@ -1229,9 +1229,9 @@
+ 		LASSERTF(S_ISDIR(inode->i_mode), "Not slave inode "DFID"\n",
+ 			 PFID(fid));
+ 
+-		LTIME_S(inode->i_mtime) = 0;
+-		LTIME_S(inode->i_atime) = 0;
+-		LTIME_S(inode->i_ctime) = 0;
++		LTIME_N(inode->i_mtime) = 0;
++		LTIME_N(inode->i_atime) = 0;
++		LTIME_N(inode->i_ctime) = 0;
+ 		inode->i_rdev = 0;
+ 
+ #ifdef HAVE_BACKING_DEV_INFO
+@@ -1611,7 +1611,7 @@
+ 
+         if (attr->ia_valid & (ATTR_MTIME | ATTR_CTIME))
+ 		CDEBUG(D_INODE, "setting mtime %lu, ctime %lu, now = %llu\n",
+-                       LTIME_S(attr->ia_mtime), LTIME_S(attr->ia_ctime),
++                       LTIME_N(attr->ia_mtime), LTIME_N(attr->ia_ctime),
+ 		       (s64)ktime_get_real_seconds());
+ 
+ 	if (S_ISREG(inode->i_mode)) {
+@@ -1886,24 +1886,24 @@
+ 	inode->i_generation = cl_fid_build_gen(&body->mbo_fid1);
+ 
+ 	if (body->mbo_valid & OBD_MD_FLATIME) {
+-		if (body->mbo_atime > LTIME_S(inode->i_atime))
+-			LTIME_S(inode->i_atime) = body->mbo_atime;
++		if (body->mbo_atime > LTIME_N(inode->i_atime))
++			LTIME_N(inode->i_atime) = body->mbo_atime;
+ 		lli->lli_atime = body->mbo_atime;
+ 	}
+ 
+ 	if (body->mbo_valid & OBD_MD_FLMTIME) {
+-		if (body->mbo_mtime > LTIME_S(inode->i_mtime)) {
++		if (body->mbo_mtime > LTIME_N(inode->i_mtime)) {
+ 			CDEBUG(D_INODE, "setting ino %lu mtime from %lu "
+ 			       "to %llu\n", inode->i_ino,
+-			       LTIME_S(inode->i_mtime), body->mbo_mtime);
+-			LTIME_S(inode->i_mtime) = body->mbo_mtime;
++			       LTIME_N(inode->i_mtime), body->mbo_mtime);
++			LTIME_N(inode->i_mtime) = body->mbo_mtime;
+ 		}
+ 		lli->lli_mtime = body->mbo_mtime;
+ 	}
+ 
+ 	if (body->mbo_valid & OBD_MD_FLCTIME) {
+-		if (body->mbo_ctime > LTIME_S(inode->i_ctime))
+-			LTIME_S(inode->i_ctime) = body->mbo_ctime;
++		if (body->mbo_ctime > LTIME_N(inode->i_ctime))
++			LTIME_N(inode->i_ctime) = body->mbo_ctime;
+ 		lli->lli_ctime = body->mbo_ctime;
+ 	}
+ 
+@@ -1990,9 +1990,9 @@
+          * the VFS doesn't zero times in the core inode so we have to do
+          * it ourselves.  They will be overwritten by either MDS or OST
+          * attributes - we just need to make sure they aren't newer. */
+-        LTIME_S(inode->i_mtime) = 0;
+-        LTIME_S(inode->i_atime) = 0;
+-        LTIME_S(inode->i_ctime) = 0;
++        LTIME_N(inode->i_mtime) = 0;
++        LTIME_N(inode->i_atime) = 0;
++        LTIME_N(inode->i_ctime) = 0;
+         inode->i_rdev = 0;
+ 	rc = ll_update_inode(inode, md);
+ 	if (rc != 0)
+diff -uNr lustre-release/lustre/llite/namei.c lustre-release-new/lustre/llite/namei.c
+--- lustre-release/lustre/llite/namei.c	2019-09-19 11:50:33.913343035 +0800
++++ lustre-release-new/lustre/llite/namei.c	2019-09-19 11:55:37.127570466 +0800
+@@ -1004,16 +1004,16 @@
+ 
+ 	LASSERT(body);
+ 	if (body->mbo_valid & OBD_MD_FLMTIME &&
+-	    body->mbo_mtime > LTIME_S(inode->i_mtime)) {
++	    body->mbo_mtime > LTIME_N(inode->i_mtime)) {
+ 		CDEBUG(D_INODE, "setting fid "DFID" mtime from %lu to %llu"
+ 		       "\n", PFID(ll_inode2fid(inode)),
+-		       LTIME_S(inode->i_mtime), body->mbo_mtime);
+-		LTIME_S(inode->i_mtime) = body->mbo_mtime;
++		       LTIME_N(inode->i_mtime), body->mbo_mtime);
++		LTIME_N(inode->i_mtime) = body->mbo_mtime;
+ 	}
+ 
+ 	if (body->mbo_valid & OBD_MD_FLCTIME &&
+-	    body->mbo_ctime > LTIME_S(inode->i_ctime))
+-		LTIME_S(inode->i_ctime) = body->mbo_ctime;
++	    body->mbo_ctime > LTIME_N(inode->i_ctime))
++		LTIME_N(inode->i_ctime) = body->mbo_ctime;
+ }
+ 
+ static int ll_new_node(struct inode *dir, struct dentry *dchild,
+diff -uNr lustre-release/lustre/llite/vvp_object.c lustre-release-new/lustre/llite/vvp_object.c
+--- lustre-release/lustre/llite/vvp_object.c	2019-09-19 11:50:33.917343051 +0800
++++ lustre-release-new/lustre/llite/vvp_object.c	2019-09-19 11:55:37.881573518 +0800
+@@ -94,9 +94,9 @@
+ 	 */
+ 
+ 	attr->cat_size = i_size_read(inode);
+-	attr->cat_mtime = inode->i_mtime.tv_sec;
+-	attr->cat_atime = inode->i_atime.tv_sec;
+-	attr->cat_ctime = inode->i_ctime.tv_sec;
++	attr->cat_mtime = LTIME_N(inode->i_mtime);
++	attr->cat_atime = LTIME_N(inode->i_atime);
++	attr->cat_ctime = LTIME_N(inode->i_ctime);
+ 	attr->cat_blocks = inode->i_blocks;
+ 	attr->cat_uid = from_kuid(&init_user_ns, inode->i_uid);
+ 	attr->cat_gid = from_kgid(&init_user_ns, inode->i_gid);
+@@ -115,11 +115,11 @@
+ 	if (valid & CAT_GID)
+ 		inode->i_gid = make_kgid(&init_user_ns, attr->cat_gid);
+ 	if (valid & CAT_ATIME)
+-		inode->i_atime.tv_sec = attr->cat_atime;
++		LTIME_N(inode->i_atime) = attr->cat_atime;
+ 	if (valid & CAT_MTIME)
+-		inode->i_mtime.tv_sec = attr->cat_mtime;
++		LTIME_N(inode->i_mtime) = attr->cat_mtime;
+ 	if (valid & CAT_CTIME)
+-		inode->i_ctime.tv_sec = attr->cat_ctime;
++		LTIME_N(inode->i_ctime) = attr->cat_ctime;
+ 	if (0 && valid & CAT_SIZE)
+ 		i_size_write(inode, attr->cat_size);
+ 	if (valid & CAT_PROJID)
+@@ -178,9 +178,9 @@
+ 	struct inode *inode = vvp_object_inode(obj);
+ 
+ 	ENTRY;
+-	lvb->lvb_mtime = LTIME_S(inode->i_mtime);
+-	lvb->lvb_atime = LTIME_S(inode->i_atime);
+-	lvb->lvb_ctime = LTIME_S(inode->i_ctime);
++	lvb->lvb_mtime = LTIME_N(inode->i_mtime);
++	lvb->lvb_atime = LTIME_N(inode->i_atime);
++	lvb->lvb_ctime = LTIME_N(inode->i_ctime);
+ 
+ 	/*
+ 	 * LU-417: Add dirty pages block count lest i_blocks reports 0, some
+diff -uNr lustre-release/lustre/lmv/lmv_intent.c lustre-release-new/lustre/lmv/lmv_intent.c
+--- lustre-release/lustre/lmv/lmv_intent.c	2019-09-19 11:50:33.919343059 +0800
++++ lustre-release-new/lustre/lmv/lmv_intent.c	2019-09-19 11:55:38.672576720 +0800
+@@ -233,9 +233,9 @@
+ 			i_size_write(inode, body->mbo_size);
+ 			inode->i_blocks = body->mbo_blocks;
+ 			set_nlink(inode, body->mbo_nlink);
+-			LTIME_S(inode->i_atime) = body->mbo_atime;
+-			LTIME_S(inode->i_ctime) = body->mbo_ctime;
+-			LTIME_S(inode->i_mtime) = body->mbo_mtime;
++			LTIME_N(inode->i_atime) = body->mbo_atime;
++			LTIME_N(inode->i_ctime) = body->mbo_ctime;
++			LTIME_N(inode->i_mtime) = body->mbo_mtime;
+ 		}
+ 
+ 		md_set_lock_data(tgt->ltd_exp, lockh, inode, NULL);
+diff -uNr lustre-release/lustre/lmv/lmv_obd.c lustre-release-new/lustre/lmv/lmv_obd.c
+--- lustre-release/lustre/lmv/lmv_obd.c	2019-09-19 11:50:33.921343068 +0800
++++ lustre-release-new/lustre/lmv/lmv_obd.c	2019-09-19 11:55:39.432579797 +0800
+@@ -3101,8 +3101,8 @@
+ 		       " atime %lu ctime %lu, mtime %lu.\n",
+ 		       PFID(&lsm->lsm_md_oinfo[i].lmo_fid),
+ 		       i_size_read(inode), (unsigned long long)inode->i_blocks,
+-		       inode->i_nlink, LTIME_S(inode->i_atime),
+-		       LTIME_S(inode->i_ctime), LTIME_S(inode->i_mtime));
++		       inode->i_nlink, LTIME_N(inode->i_atime),
++		       LTIME_N(inode->i_ctime), LTIME_N(inode->i_mtime));
+ 
+ 		/* for slave stripe, it needs to subtract nlink for . and .. */
+ 		if (i != 0)
+@@ -3113,14 +3113,14 @@
+ 		attr->cat_size += i_size_read(inode);
+ 		attr->cat_blocks += inode->i_blocks;
+ 
+-		if (attr->cat_atime < LTIME_S(inode->i_atime))
+-			attr->cat_atime = LTIME_S(inode->i_atime);
++		if (attr->cat_atime < LTIME_N(inode->i_atime))
++			attr->cat_atime = LTIME_N(inode->i_atime);
+ 
+-		if (attr->cat_ctime < LTIME_S(inode->i_ctime))
+-			attr->cat_ctime = LTIME_S(inode->i_ctime);
++		if (attr->cat_ctime < LTIME_N(inode->i_ctime))
++			attr->cat_ctime = LTIME_N(inode->i_ctime);
+ 
+-		if (attr->cat_mtime < LTIME_S(inode->i_mtime))
+-			attr->cat_mtime = LTIME_S(inode->i_mtime);
++		if (attr->cat_mtime < LTIME_N(inode->i_mtime))
++			attr->cat_mtime = LTIME_N(inode->i_mtime);
+ 	}
+ 	return 0;
+ }
+diff -uNr lustre-release/lustre/mdc/mdc_lib.c lustre-release-new/lustre/mdc/mdc_lib.c
+--- lustre-release/lustre/mdc/mdc_lib.c	2019-09-19 11:50:33.935343124 +0800
++++ lustre-release-new/lustre/mdc/mdc_lib.c	2019-09-19 11:55:40.079582416 +0800
+@@ -340,9 +340,9 @@
+ 	rec->sa_projid = op_data->op_projid;
+ 	rec->sa_size   = op_data->op_attr.ia_size;
+ 	rec->sa_blocks = op_data->op_attr_blocks;
+-	rec->sa_atime  = LTIME_S(op_data->op_attr.ia_atime);
+-	rec->sa_mtime  = LTIME_S(op_data->op_attr.ia_mtime);
+-	rec->sa_ctime  = LTIME_S(op_data->op_attr.ia_ctime);
++	rec->sa_atime  = LTIME_N(op_data->op_attr.ia_atime);
++	rec->sa_mtime  = LTIME_N(op_data->op_attr.ia_mtime);
++	rec->sa_ctime  = LTIME_N(op_data->op_attr.ia_ctime);
+ 	rec->sa_attr_flags = op_data->op_attr_flags;
+ 	if ((op_data->op_attr.ia_valid & ATTR_GID) &&
+ 	     in_group_p(op_data->op_attr.ia_gid))
+diff -uNr lustre-release/lustre/mdc/mdc_reint.c lustre-release-new/lustre/mdc/mdc_reint.c
+--- lustre-release/lustre/mdc/mdc_reint.c	2019-09-19 11:50:33.935343124 +0800
++++ lustre-release-new/lustre/mdc/mdc_reint.c	2019-09-19 11:55:40.867585606 +0800
+@@ -132,8 +132,8 @@
+ 
+         if (op_data->op_attr.ia_valid & (ATTR_MTIME | ATTR_CTIME))
+ 		CDEBUG(D_INODE, "setting mtime %ld, ctime %ld\n",
+-                       LTIME_S(op_data->op_attr.ia_mtime),
+-                       LTIME_S(op_data->op_attr.ia_ctime));
++                       LTIME_N(op_data->op_attr.ia_mtime),
++                       LTIME_N(op_data->op_attr.ia_ctime));
+ 	mdc_setattr_pack(req, op_data, ea, ealen);
+ 
+ 	req_capsule_set_size(&req->rq_pill, &RMF_ACL, RCL_SERVER,
+diff -uNr lustre-release/lustre/mdt/mdt_handler.c lustre-release-new/lustre/mdt/mdt_handler.c
+--- lustre-release/lustre/mdt/mdt_handler.c	2019-09-19 11:50:33.943343157 +0800
++++ lustre-release-new/lustre/mdt/mdt_handler.c	2019-09-19 11:55:42.097590585 +0800
+@@ -1676,7 +1676,7 @@
+                         if (ma->ma_valid & MA_INODE &&
+                             ma->ma_attr.la_valid & LA_CTIME &&
+                             info->mti_mdt->mdt_namespace->ns_ctime_age_limit +
+-                                ma->ma_attr.la_ctime < cfs_time_current_sec())
++                                ma->ma_attr.la_ctime < LTIME_N(CURRENT_TIME))
+                                 child_bits |= MDS_INODELOCK_UPDATE;
+                 }
+ 
+diff -uNr lustre-release/lustre/mdt/mdt_xattr.c lustre-release-new/lustre/mdt/mdt_xattr.c
+--- lustre-release/lustre/mdt/mdt_xattr.c	2019-09-19 11:50:33.948343177 +0800
++++ lustre-release-new/lustre/mdt/mdt_xattr.c	2019-09-19 11:55:42.863593686 +0800
+@@ -398,7 +398,7 @@
+ 		      "setxattr %s: [object "DFID"] [valid %llu]\n",
+ 		      mdt_obd_name(info->mti_mdt), xattr_name,
+ 		      PFID(rr->rr_fid1), valid);
+-		attr->la_ctime = cfs_time_current_sec();
++		attr->la_ctime = LTIME_N(CURRENT_TIME);
+ 	}
+ 	attr->la_valid = LA_CTIME;
+ 	child = mdt_object_child(obj);
+diff -uNr lustre-release/lustre/obdclass/obdo.c lustre-release-new/lustre/obdclass/obdo.c
+--- lustre-release/lustre/obdclass/obdo.c	2019-09-19 11:50:33.967343254 +0800
++++ lustre-release-new/lustre/obdclass/obdo.c	2019-09-19 11:55:43.527596373 +0800
+@@ -70,19 +70,19 @@
+ 
+ 	if (valid & (OBD_MD_FLCTIME | OBD_MD_FLMTIME))
+ 		CDEBUG(D_INODE, "valid %#llx, new time %lu/%lu\n",
+-			valid, LTIME_S(src->i_mtime),
+-			LTIME_S(src->i_ctime));
++			valid, LTIME_N(src->i_mtime),
++			LTIME_N(src->i_ctime));
+ 
+         if (valid & OBD_MD_FLATIME) {
+-                dst->o_atime = LTIME_S(src->i_atime);
++                dst->o_atime = LTIME_N(src->i_atime);
+                 newvalid |= OBD_MD_FLATIME;
+         }
+         if (valid & OBD_MD_FLMTIME) {
+-                dst->o_mtime = LTIME_S(src->i_mtime);
++                dst->o_mtime = LTIME_N(src->i_mtime);
+                 newvalid |= OBD_MD_FLMTIME;
+         }
+         if (valid & OBD_MD_FLCTIME) {
+-                dst->o_ctime = LTIME_S(src->i_ctime);
++                dst->o_ctime = LTIME_N(src->i_ctime);
+                 newvalid |= OBD_MD_FLCTIME;
+         }
+         if (valid & OBD_MD_FLSIZE) {
+diff -uNr lustre-release/lustre/obdecho/echo_client.c lustre-release-new/lustre/obdecho/echo_client.c
+--- lustre-release/lustre/obdecho/echo_client.c	2019-09-19 11:50:33.969343262 +0800
++++ lustre-release-new/lustre/obdecho/echo_client.c	2019-09-19 11:55:44.216599163 +0800
+@@ -1614,7 +1614,7 @@
+ 
+         ma->ma_attr.la_mode = mode;
+ 	ma->ma_attr.la_valid = LA_CTIME | LA_MODE;
+-        ma->ma_attr.la_ctime = cfs_time_current_64();
++        ma->ma_attr.la_ctime = LTIME_N(CURRENT_TIME);
+ 
+         if (name != NULL) {
+                 lname->ln_name = name;
+@@ -1913,7 +1913,7 @@
+         memset(ma, 0, sizeof(*ma));
+         ma->ma_attr.la_mode = mode;
+         ma->ma_attr.la_valid = LA_CTIME;
+-        ma->ma_attr.la_ctime = cfs_time_current_64();
++        ma->ma_attr.la_ctime = LTIME_N(CURRENT_TIME);
+         ma->ma_need = MA_INODE;
+         ma->ma_valid = 0;
+ 
+diff -uNr lustre-release/lustre/osc/osc_io.c lustre-release-new/lustre/osc/osc_io.c
+--- lustre-release/lustre/osc/osc_io.c	2019-09-19 11:50:33.975343286 +0800
++++ lustre-release-new/lustre/osc/osc_io.c	2019-09-19 11:55:44.854601745 +0800
+@@ -212,11 +212,14 @@
+ 
+ 	/* Update c/mtime for sync write. LU-7310 */
+ 	if (crt == CRT_WRITE && qout->pl_nr > 0 && result == 0) {
+-		struct cl_object *obj   = ios->cis_obj;
++		struct timespec64 ts;
++        struct cl_object *obj   = ios->cis_obj;
+ 		struct cl_attr *attr = &osc_env_info(env)->oti_attr;
+ 
+ 		cl_object_attr_lock(obj);
+-		attr->cat_mtime = attr->cat_ctime = ktime_get_real_seconds();
++
++        ktime_get_real_ts64(&ts);
++        attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);;
+ 		cl_object_attr_update(env, obj, attr, CAT_MTIME | CAT_CTIME);
+ 		cl_object_attr_unlock(obj);
+ 	}
+@@ -235,6 +238,7 @@
+ static void osc_page_touch_at(const struct lu_env *env,
+ 			      struct cl_object *obj, pgoff_t idx, size_t to)
+ {
++        struct timespec64 ts;
+         struct lov_oinfo  *loi  = cl2osc(obj)->oo_oinfo;
+         struct cl_attr    *attr = &osc_env_info(env)->oti_attr;
+         int valid;
+@@ -254,8 +258,9 @@
+ 	CDEBUG(D_INODE, "stripe KMS %sincreasing %llu->%llu %llu\n",
+                kms > loi->loi_kms ? "" : "not ", loi->loi_kms, kms,
+                loi->loi_lvb.lvb_size);
+-
+-	attr->cat_mtime = attr->cat_ctime = ktime_get_real_seconds();
++    
++    ktime_get_real_ts64(&ts);
++	attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);
+ 	valid = CAT_MTIME | CAT_CTIME;
+ 	if (kms > loi->loi_kms) {
+ 		attr->cat_kms = kms;
+@@ -747,6 +752,7 @@
+ static int osc_io_write_start(const struct lu_env *env,
+                               const struct cl_io_slice *slice)
+ {
++    struct timespec64 ts;
+ 	struct cl_object *obj   = slice->cis_obj;
+ 	struct cl_attr   *attr  = &osc_env_info(env)->oti_attr;
+ 	int rc = 0;
+@@ -754,7 +760,9 @@
+ 
+ 	OBD_FAIL_TIMEOUT(OBD_FAIL_OSC_DELAY_SETTIME, 1);
+ 	cl_object_attr_lock(obj);
+-	attr->cat_mtime = attr->cat_ctime = ktime_get_real_seconds();
++
++    ktime_get_real_ts64(&ts);
++	attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);
+ 	rc = cl_object_attr_update(env, obj, attr, CAT_MTIME | CAT_CTIME);
+ 	cl_object_attr_unlock(obj);
+ 
+diff -uNr lustre-release/lustre/osd-ldiskfs/osd_handler.c lustre-release-new/lustre/osd-ldiskfs/osd_handler.c
+--- lustre-release/lustre/osd-ldiskfs/osd_handler.c	2019-09-19 11:50:33.980343306 +0800
++++ lustre-release-new/lustre/osd-ldiskfs/osd_handler.c	2019-09-19 11:55:45.581604688 +0800
+@@ -2347,13 +2347,13 @@
+ }
+ 
+ static struct timespec *osd_inode_time(const struct lu_env *env,
+-				       struct inode *inode, __u64 seconds)
++				       struct inode *inode, __u64 nanoseconds)
+ {
+ 	struct osd_thread_info	*oti = osd_oti_get(env);
+ 	struct timespec		*t   = &oti->oti_time;
+ 
+-	t->tv_sec = seconds;
+-	t->tv_nsec = 0;
++	t->tv_sec = 0;
++	t->tv_nsec = nanoseconds;
+ 	*t = timespec_trunc(*t, inode->i_sb->s_time_gran);
+ 	return t;
+ }
+@@ -2366,9 +2366,9 @@
+ 			   LA_PROJID | LA_FLAGS | LA_NLINK | LA_RDEV |
+ 			   LA_BLKSIZE | LA_TYPE;
+ 
+-	attr->la_atime	 = LTIME_S(inode->i_atime);
+-	attr->la_mtime	 = LTIME_S(inode->i_mtime);
+-	attr->la_ctime	 = LTIME_S(inode->i_ctime);
++	attr->la_atime	 = LTIME_N(inode->i_atime);
++	attr->la_mtime	 = LTIME_N(inode->i_mtime);
++	attr->la_ctime	 = LTIME_N(inode->i_ctime);
+ 	attr->la_mode	 = inode->i_mode;
+ 	attr->la_size	 = i_size_read(inode);
+ 	attr->la_blocks	 = inode->i_blocks;
+@@ -2970,11 +2970,11 @@
+ 
+         if (dof->dof_type != DFT_NODE)
+                 attr->la_valid &= ~LA_RDEV;
+-        if ((valid & LA_ATIME) && (attr->la_atime == LTIME_S(inode->i_atime)))
++        if ((valid & LA_ATIME) && (attr->la_atime == LTIME_N(inode->i_atime)))
+                 attr->la_valid &= ~LA_ATIME;
+-        if ((valid & LA_CTIME) && (attr->la_ctime == LTIME_S(inode->i_ctime)))
++        if ((valid & LA_CTIME) && (attr->la_ctime == LTIME_N(inode->i_ctime)))
+                 attr->la_valid &= ~LA_CTIME;
+-        if ((valid & LA_MTIME) && (attr->la_mtime == LTIME_S(inode->i_mtime)))
++        if ((valid & LA_MTIME) && (attr->la_mtime == LTIME_N(inode->i_mtime)))
+                 attr->la_valid &= ~LA_MTIME;
+ 
+ 	result = osd_quota_transfer(inode, attr);

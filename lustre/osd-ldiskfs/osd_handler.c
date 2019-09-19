@@ -2347,13 +2347,13 @@ static int osd_write_locked(const struct lu_env *env, struct dt_object *dt)
 }
 
 static struct timespec *osd_inode_time(const struct lu_env *env,
-				       struct inode *inode, __u64 seconds)
+				       struct inode *inode, __u64 nanoseconds)
 {
 	struct osd_thread_info	*oti = osd_oti_get(env);
 	struct timespec		*t   = &oti->oti_time;
 
-	t->tv_sec = seconds;
-	t->tv_nsec = 0;
+	t->tv_sec = 0;
+	t->tv_nsec = nanoseconds;
 	*t = timespec_trunc(*t, inode->i_sb->s_time_gran);
 	return t;
 }
@@ -2366,9 +2366,9 @@ static void osd_inode_getattr(const struct lu_env *env,
 			   LA_PROJID | LA_FLAGS | LA_NLINK | LA_RDEV |
 			   LA_BLKSIZE | LA_TYPE;
 
-	attr->la_atime	 = LTIME_S(inode->i_atime);
-	attr->la_mtime	 = LTIME_S(inode->i_mtime);
-	attr->la_ctime	 = LTIME_S(inode->i_ctime);
+	attr->la_atime	 = LTIME_N(inode->i_atime);
+	attr->la_mtime	 = LTIME_N(inode->i_mtime);
+	attr->la_ctime	 = LTIME_N(inode->i_ctime);
 	attr->la_mode	 = inode->i_mode;
 	attr->la_size	 = i_size_read(inode);
 	attr->la_blocks	 = inode->i_blocks;
@@ -2970,11 +2970,11 @@ static void osd_attr_init(struct osd_thread_info *info, struct osd_object *obj,
 
         if (dof->dof_type != DFT_NODE)
                 attr->la_valid &= ~LA_RDEV;
-        if ((valid & LA_ATIME) && (attr->la_atime == LTIME_S(inode->i_atime)))
+        if ((valid & LA_ATIME) && (attr->la_atime == LTIME_N(inode->i_atime)))
                 attr->la_valid &= ~LA_ATIME;
-        if ((valid & LA_CTIME) && (attr->la_ctime == LTIME_S(inode->i_ctime)))
+        if ((valid & LA_CTIME) && (attr->la_ctime == LTIME_N(inode->i_ctime)))
                 attr->la_valid &= ~LA_CTIME;
-        if ((valid & LA_MTIME) && (attr->la_mtime == LTIME_S(inode->i_mtime)))
+        if ((valid & LA_MTIME) && (attr->la_mtime == LTIME_N(inode->i_mtime)))
                 attr->la_valid &= ~LA_MTIME;
 
 	result = osd_quota_transfer(inode, attr);

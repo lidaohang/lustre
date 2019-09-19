@@ -1229,9 +1229,9 @@ static struct inode *ll_iget_anon_dir(struct super_block *sb,
 		LASSERTF(S_ISDIR(inode->i_mode), "Not slave inode "DFID"\n",
 			 PFID(fid));
 
-		LTIME_S(inode->i_mtime) = 0;
-		LTIME_S(inode->i_atime) = 0;
-		LTIME_S(inode->i_ctime) = 0;
+		LTIME_N(inode->i_mtime) = 0;
+		LTIME_N(inode->i_atime) = 0;
+		LTIME_N(inode->i_ctime) = 0;
 		inode->i_rdev = 0;
 
 #ifdef HAVE_BACKING_DEV_INFO
@@ -1611,7 +1611,7 @@ int ll_setattr_raw(struct dentry *dentry, struct iattr *attr, bool hsm_import)
 
         if (attr->ia_valid & (ATTR_MTIME | ATTR_CTIME))
 		CDEBUG(D_INODE, "setting mtime %lu, ctime %lu, now = %llu\n",
-                       LTIME_S(attr->ia_mtime), LTIME_S(attr->ia_ctime),
+                       LTIME_N(attr->ia_mtime), LTIME_N(attr->ia_ctime),
 		       (s64)ktime_get_real_seconds());
 
 	if (S_ISREG(inode->i_mode)) {
@@ -1886,24 +1886,24 @@ int ll_update_inode(struct inode *inode, struct lustre_md *md)
 	inode->i_generation = cl_fid_build_gen(&body->mbo_fid1);
 
 	if (body->mbo_valid & OBD_MD_FLATIME) {
-		if (body->mbo_atime > LTIME_S(inode->i_atime))
-			LTIME_S(inode->i_atime) = body->mbo_atime;
+		if (body->mbo_atime > LTIME_N(inode->i_atime))
+			LTIME_N(inode->i_atime) = body->mbo_atime;
 		lli->lli_atime = body->mbo_atime;
 	}
 
 	if (body->mbo_valid & OBD_MD_FLMTIME) {
-		if (body->mbo_mtime > LTIME_S(inode->i_mtime)) {
+		if (body->mbo_mtime > LTIME_N(inode->i_mtime)) {
 			CDEBUG(D_INODE, "setting ino %lu mtime from %lu "
 			       "to %llu\n", inode->i_ino,
-			       LTIME_S(inode->i_mtime), body->mbo_mtime);
-			LTIME_S(inode->i_mtime) = body->mbo_mtime;
+			       LTIME_N(inode->i_mtime), body->mbo_mtime);
+			LTIME_N(inode->i_mtime) = body->mbo_mtime;
 		}
 		lli->lli_mtime = body->mbo_mtime;
 	}
 
 	if (body->mbo_valid & OBD_MD_FLCTIME) {
-		if (body->mbo_ctime > LTIME_S(inode->i_ctime))
-			LTIME_S(inode->i_ctime) = body->mbo_ctime;
+		if (body->mbo_ctime > LTIME_N(inode->i_ctime))
+			LTIME_N(inode->i_ctime) = body->mbo_ctime;
 		lli->lli_ctime = body->mbo_ctime;
 	}
 
@@ -1990,9 +1990,9 @@ int ll_read_inode2(struct inode *inode, void *opaque)
          * the VFS doesn't zero times in the core inode so we have to do
          * it ourselves.  They will be overwritten by either MDS or OST
          * attributes - we just need to make sure they aren't newer. */
-        LTIME_S(inode->i_mtime) = 0;
-        LTIME_S(inode->i_atime) = 0;
-        LTIME_S(inode->i_ctime) = 0;
+        LTIME_N(inode->i_mtime) = 0;
+        LTIME_N(inode->i_atime) = 0;
+        LTIME_N(inode->i_ctime) = 0;
         inode->i_rdev = 0;
 	rc = ll_update_inode(inode, md);
 	if (rc != 0)

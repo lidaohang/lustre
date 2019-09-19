@@ -94,6 +94,8 @@ static inline void ll_set_fs_pwd(struct fs_struct *fs, struct vfsmount *mnt,
 
 #define LTIME_S(time)                   (time.tv_sec)
 
+#define LTIME_N(time)                   (time.tv_nsec)
+
 #ifdef HAVE_GENERIC_PERMISSION_2ARGS
 # define ll_generic_permission(inode, mask, flags, check_acl) \
 	 generic_permission(inode, mask)

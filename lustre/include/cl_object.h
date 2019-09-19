@@ -146,11 +146,11 @@ struct cl_attr {
          * This is only valid when at least one DLM lock is held.
          */
         loff_t cat_kms;
-        /** Modification time. Measured in seconds since epoch. */
+        /** Modification time. Measured in nanoseconds since epoch. */
         time64_t cat_mtime;
-        /** Access time. Measured in seconds since epoch. */
+        /** Access time. Measured in nanoseconds since epoch. */
         time64_t cat_atime;
-        /** Change time. Measured in seconds since epoch. */
+        /** Change time. Measured in nanoseconds since epoch. */
         time64_t cat_ctime;
         /**
          * Blocks allocated to this cl_object on the server file system.

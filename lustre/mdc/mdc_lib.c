@@ -340,9 +340,9 @@ static void mdc_setattr_pack_rec(struct mdt_rec_setattr *rec,
 	rec->sa_projid = op_data->op_projid;
 	rec->sa_size   = op_data->op_attr.ia_size;
 	rec->sa_blocks = op_data->op_attr_blocks;
-	rec->sa_atime  = LTIME_S(op_data->op_attr.ia_atime);
-	rec->sa_mtime  = LTIME_S(op_data->op_attr.ia_mtime);
-	rec->sa_ctime  = LTIME_S(op_data->op_attr.ia_ctime);
+	rec->sa_atime  = LTIME_N(op_data->op_attr.ia_atime);
+	rec->sa_mtime  = LTIME_N(op_data->op_attr.ia_mtime);
+	rec->sa_ctime  = LTIME_N(op_data->op_attr.ia_ctime);
 	rec->sa_attr_flags = op_data->op_attr_flags;
 	if ((op_data->op_attr.ia_valid & ATTR_GID) &&
 	     in_group_p(op_data->op_attr.ia_gid))

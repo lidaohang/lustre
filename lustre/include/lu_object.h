@@ -400,11 +400,11 @@ struct lu_attr {
 	__u64          la_valid;
         /** size in bytes */
         __u64          la_size;
-	/** modification time in seconds since Epoch */
+	/** modification time in nanoseconds since Epoch */
 	s64		la_mtime;
-	/** access time in seconds since Epoch */
+	/** access time in nanoseconds since Epoch */
 	s64		la_atime;
-	/** change time in seconds since Epoch */
+	/** change time in nanoseconds since Epoch */
 	s64		la_ctime;
         /** 512-byte blocks allocated to object */
         __u64          la_blocks;

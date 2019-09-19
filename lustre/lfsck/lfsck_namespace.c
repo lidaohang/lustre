@@ -1007,7 +1007,7 @@ again:
 	}
 
 	memset(la, 0, sizeof(*la));
-	la->la_ctime = cfs_time_current_sec();
+	la->la_ctime = LTIME_N(CURRENT_TIME);
 	la->la_valid = LA_CTIME;
 	rc = dt_declare_attr_set(env, orphan, la, th);
 	if (rc != 0)
@@ -1168,7 +1168,7 @@ static int lfsck_namespace_insert_normal(const struct lu_env *env,
 	}
 
 	memset(la, 0, sizeof(*la));
-	la->la_ctime = cfs_time_current_sec();
+	la->la_ctime = LTIME_N(CURRENT_TIME);
 	la->la_valid = LA_CTIME;
 	rc = dt_declare_attr_set(env, parent, la, th);
 	if (rc != 0)
@@ -1195,7 +1195,7 @@ static int lfsck_namespace_insert_normal(const struct lu_env *env,
 			GOTO(stop, rc);
 	}
 
-	la->la_ctime = cfs_time_current_sec();
+	la->la_ctime = LTIME_N(CURRENT_TIME);
 	rc = dt_attr_set(env, parent, la, th);
 	if (rc != 0)
 		GOTO(stop, rc);
