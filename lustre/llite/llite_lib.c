@@ -1612,7 +1612,7 @@ int ll_setattr_raw(struct dentry *dentry, struct iattr *attr, bool hsm_import)
         if (attr->ia_valid & (ATTR_MTIME | ATTR_CTIME))
 		CDEBUG(D_INODE, "setting mtime %lu, ctime %lu, now = %llu\n",
                        LTIME_N(attr->ia_mtime), LTIME_N(attr->ia_ctime),
-		       (s64)LTIME_N(ktime_get_real_seconds()));
+		       (s64)LTIME_N(CURRENT_TIME));
 
 	if (S_ISREG(inode->i_mode)) {
 		if (attr->ia_valid & ATTR_SIZE)
