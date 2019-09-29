@@ -1,6 +1,6 @@
-diff -uNr lustre-release/lustre/include/cl_object.h lustre-release-new/lustre/include/cl_object.h
---- lustre-release/lustre/include/cl_object.h	2019-09-19 11:50:33.860342821 +0800
-+++ lustre-release-new/lustre/include/cl_object.h	2019-09-19 11:55:30.196542408 +0800
+diff -uNr lustre-release/lustre/include/cl_object.h lustre-2.10.3/lustre/include/cl_object.h
+--- lustre-release/lustre/include/cl_object.h	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/include/cl_object.h	2019-09-29 17:54:22.000000000 +0800
 @@ -146,11 +146,11 @@
           * This is only valid when at least one DLM lock is held.
           */
@@ -16,9 +16,9 @@ diff -uNr lustre-release/lustre/include/cl_object.h lustre-release-new/lustre/in
          time64_t cat_ctime;
          /**
           * Blocks allocated to this cl_object on the server file system.
-diff -uNr lustre-release/lustre/include/lu_object.h lustre-release-new/lustre/include/lu_object.h
---- lustre-release/lustre/include/lu_object.h	2019-09-19 11:50:33.862342829 +0800
-+++ lustre-release-new/lustre/include/lu_object.h	2019-09-19 11:55:31.551547894 +0800
+diff -uNr lustre-release/lustre/include/lu_object.h lustre-2.10.3/lustre/include/lu_object.h
+--- lustre-release/lustre/include/lu_object.h	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/include/lu_object.h	2019-09-29 17:54:22.000000000 +0800
 @@ -400,11 +400,11 @@
  	__u64          la_valid;
          /** size in bytes */
@@ -34,9 +34,9 @@ diff -uNr lustre-release/lustre/include/lu_object.h lustre-release-new/lustre/in
  	s64		la_ctime;
          /** 512-byte blocks allocated to object */
          __u64          la_blocks;
-diff -uNr lustre-release/lustre/include/lustre_compat.h lustre-release-new/lustre/include/lustre_compat.h
---- lustre-release/lustre/include/lustre_compat.h	2019-09-19 11:50:33.866342845 +0800
-+++ lustre-release-new/lustre/include/lustre_compat.h	2019-09-19 11:55:32.446551517 +0800
+diff -uNr lustre-release/lustre/include/lustre_compat.h lustre-2.10.3/lustre/include/lustre_compat.h
+--- lustre-release/lustre/include/lustre_compat.h	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/include/lustre_compat.h	2019-09-29 17:54:22.000000000 +0800
 @@ -94,6 +94,8 @@
  
  #define LTIME_S(time)                   (time.tv_sec)
@@ -46,9 +46,9 @@ diff -uNr lustre-release/lustre/include/lustre_compat.h lustre-release-new/lustr
  #ifdef HAVE_GENERIC_PERMISSION_2ARGS
  # define ll_generic_permission(inode, mask, flags, check_acl) \
  	 generic_permission(inode, mask)
-diff -uNr lustre-release/lustre/lfsck/lfsck_lib.c lustre-release-new/lustre/lfsck/lfsck_lib.c
---- lustre-release/lustre/lfsck/lfsck_lib.c	2019-09-19 11:50:33.903342995 +0800
-+++ lustre-release-new/lustre/lfsck/lfsck_lib.c	2019-09-19 11:55:33.266554836 +0800
+diff -uNr lustre-release/lustre/lfsck/lfsck_lib.c lustre-2.10.3/lustre/lfsck/lfsck_lib.c
+--- lustre-release/lustre/lfsck/lfsck_lib.c	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/lfsck/lfsck_lib.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1051,7 +1051,7 @@
  	}
  
@@ -58,9 +58,9 @@ diff -uNr lustre-release/lustre/lfsck/lfsck_lib.c lustre-release-new/lustre/lfsc
  	la->la_mode = S_IFDIR | S_IRWXU;
  	la->la_valid = LA_ATIME | LA_MTIME | LA_CTIME | LA_MODE |
  		       LA_UID | LA_GID;
-diff -uNr lustre-release/lustre/lfsck/lfsck_namespace.c lustre-release-new/lustre/lfsck/lfsck_namespace.c
---- lustre-release/lustre/lfsck/lfsck_namespace.c	2019-09-19 11:50:33.905343003 +0800
-+++ lustre-release-new/lustre/lfsck/lfsck_namespace.c	2019-09-19 11:55:34.057558038 +0800
+diff -uNr lustre-release/lustre/lfsck/lfsck_namespace.c lustre-2.10.3/lustre/lfsck/lfsck_namespace.c
+--- lustre-release/lustre/lfsck/lfsck_namespace.c	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/lfsck/lfsck_namespace.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1007,7 +1007,7 @@
  	}
  
@@ -88,9 +88,9 @@ diff -uNr lustre-release/lustre/lfsck/lfsck_namespace.c lustre-release-new/lustr
  	rc = dt_attr_set(env, parent, la, th);
  	if (rc != 0)
  		GOTO(stop, rc);
-diff -uNr lustre-release/lustre/llite/file.c lustre-release-new/lustre/llite/file.c
---- lustre-release/lustre/llite/file.c	2019-09-19 11:50:33.908343015 +0800
-+++ lustre-release-new/lustre/llite/file.c	2019-09-19 11:55:34.804561062 +0800
+diff -uNr lustre-release/lustre/llite/file.c lustre-2.10.3/lustre/llite/file.c
+--- lustre-release/lustre/llite/file.c	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/llite/file.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1009,16 +1009,16 @@
  	 * All in all, the atime in Lustre does not strictly comply with
  	 * POSIX. Solving this problem needs to send an RPC to MDT for each
@@ -141,9 +141,9 @@ diff -uNr lustre-release/lustre/llite/file.c lustre-release-new/lustre/llite/fil
  	} else {
  		/* In case of restore, the MDT has the right size and has
  		 * already send it back without granting the layout lock,
-diff -uNr lustre-release/lustre/llite/lcommon_cl.c lustre-release-new/lustre/llite/lcommon_cl.c
---- lustre-release/lustre/llite/lcommon_cl.c	2019-09-19 11:50:33.909343019 +0800
-+++ lustre-release-new/lustre/llite/lcommon_cl.c	2019-09-19 11:55:35.506563904 +0800
+diff -uNr lustre-release/lustre/llite/lcommon_cl.c lustre-2.10.3/lustre/llite/lcommon_cl.c
+--- lustre-release/lustre/llite/lcommon_cl.c	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/llite/lcommon_cl.c	2019-09-29 17:54:22.000000000 +0800
 @@ -86,9 +86,9 @@
  	io->ci_obj = obj;
  	io->ci_verify_layout = 1;
@@ -157,9 +157,9 @@ diff -uNr lustre-release/lustre/llite/lcommon_cl.c lustre-release-new/lustre/lli
  	io->u.ci_setattr.sa_attr.lvb_size = attr->ia_size;
  	io->u.ci_setattr.sa_attr_flags = attr_flags;
  	io->u.ci_setattr.sa_valid = attr->ia_valid;
-diff -uNr lustre-release/lustre/llite/llite_lib.c lustre-release-new/lustre/llite/llite_lib.c
---- lustre-release/lustre/llite/llite_lib.c	2019-09-19 11:50:33.911343027 +0800
-+++ lustre-release-new/lustre/llite/llite_lib.c	2019-09-19 11:55:36.272567005 +0800
+diff -uNr lustre-release/lustre/llite/llite_lib.c lustre-2.10.3/lustre/llite/llite_lib.c
+--- lustre-release/lustre/llite/llite_lib.c	2019-09-29 17:55:00.000000000 +0800
++++ lustre-2.10.3/lustre/llite/llite_lib.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1229,9 +1229,9 @@
  		LASSERTF(S_ISDIR(inode->i_mode), "Not slave inode "DFID"\n",
  			 PFID(fid));
@@ -173,15 +173,17 @@ diff -uNr lustre-release/lustre/llite/llite_lib.c lustre-release-new/lustre/llit
  		inode->i_rdev = 0;
  
  #ifdef HAVE_BACKING_DEV_INFO
-@@ -1611,7 +1611,7 @@
+@@ -1611,8 +1611,8 @@
  
          if (attr->ia_valid & (ATTR_MTIME | ATTR_CTIME))
  		CDEBUG(D_INODE, "setting mtime %lu, ctime %lu, now = %llu\n",
 -                       LTIME_S(attr->ia_mtime), LTIME_S(attr->ia_ctime),
+-		       (s64)ktime_get_real_seconds());
 +                       LTIME_N(attr->ia_mtime), LTIME_N(attr->ia_ctime),
- 		       (s64)ktime_get_real_seconds());
++		       (s64)LTIME_N(ktime_get_real_seconds()));
  
  	if (S_ISREG(inode->i_mode)) {
+ 		if (attr->ia_valid & ATTR_SIZE)
 @@ -1886,24 +1886,24 @@
  	inode->i_generation = cl_fid_build_gen(&body->mbo_fid1);
  
@@ -214,7 +216,7 @@ diff -uNr lustre-release/lustre/llite/llite_lib.c lustre-release-new/lustre/llit
  		lli->lli_ctime = body->mbo_ctime;
  	}
  
-@@ -1990,9 +1990,9 @@
+@@ -1990,9 +1990,10 @@
           * the VFS doesn't zero times in the core inode so we have to do
           * it ourselves.  They will be overwritten by either MDS or OST
           * attributes - we just need to make sure they aren't newer. */
@@ -224,12 +226,13 @@ diff -uNr lustre-release/lustre/llite/llite_lib.c lustre-release-new/lustre/llit
 +        LTIME_N(inode->i_mtime) = 0;
 +        LTIME_N(inode->i_atime) = 0;
 +        LTIME_N(inode->i_ctime) = 0;
++        LTIME_S(inode->i_mtime) = LTIME_S(inode->i_atime) = LTIME_S(inode->i_ctime) = ktime_get_real_seconds();
          inode->i_rdev = 0;
  	rc = ll_update_inode(inode, md);
  	if (rc != 0)
-diff -uNr lustre-release/lustre/llite/namei.c lustre-release-new/lustre/llite/namei.c
---- lustre-release/lustre/llite/namei.c	2019-09-19 11:50:33.913343035 +0800
-+++ lustre-release-new/lustre/llite/namei.c	2019-09-19 11:55:37.127570466 +0800
+diff -uNr lustre-release/lustre/llite/namei.c lustre-2.10.3/lustre/llite/namei.c
+--- lustre-release/lustre/llite/namei.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/llite/namei.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1004,16 +1004,16 @@
  
  	LASSERT(body);
@@ -252,9 +255,9 @@ diff -uNr lustre-release/lustre/llite/namei.c lustre-release-new/lustre/llite/na
  }
  
  static int ll_new_node(struct inode *dir, struct dentry *dchild,
-diff -uNr lustre-release/lustre/llite/vvp_object.c lustre-release-new/lustre/llite/vvp_object.c
---- lustre-release/lustre/llite/vvp_object.c	2019-09-19 11:50:33.917343051 +0800
-+++ lustre-release-new/lustre/llite/vvp_object.c	2019-09-19 11:55:37.881573518 +0800
+diff -uNr lustre-release/lustre/llite/vvp_object.c lustre-2.10.3/lustre/llite/vvp_object.c
+--- lustre-release/lustre/llite/vvp_object.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/llite/vvp_object.c	2019-09-29 17:54:22.000000000 +0800
 @@ -94,9 +94,9 @@
  	 */
  
@@ -296,9 +299,9 @@ diff -uNr lustre-release/lustre/llite/vvp_object.c lustre-release-new/lustre/lli
  
  	/*
  	 * LU-417: Add dirty pages block count lest i_blocks reports 0, some
-diff -uNr lustre-release/lustre/lmv/lmv_intent.c lustre-release-new/lustre/lmv/lmv_intent.c
---- lustre-release/lustre/lmv/lmv_intent.c	2019-09-19 11:50:33.919343059 +0800
-+++ lustre-release-new/lustre/lmv/lmv_intent.c	2019-09-19 11:55:38.672576720 +0800
+diff -uNr lustre-release/lustre/lmv/lmv_intent.c lustre-2.10.3/lustre/lmv/lmv_intent.c
+--- lustre-release/lustre/lmv/lmv_intent.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/lmv/lmv_intent.c	2019-09-29 17:54:22.000000000 +0800
 @@ -233,9 +233,9 @@
  			i_size_write(inode, body->mbo_size);
  			inode->i_blocks = body->mbo_blocks;
@@ -312,9 +315,9 @@ diff -uNr lustre-release/lustre/lmv/lmv_intent.c lustre-release-new/lustre/lmv/l
  		}
  
  		md_set_lock_data(tgt->ltd_exp, lockh, inode, NULL);
-diff -uNr lustre-release/lustre/lmv/lmv_obd.c lustre-release-new/lustre/lmv/lmv_obd.c
---- lustre-release/lustre/lmv/lmv_obd.c	2019-09-19 11:50:33.921343068 +0800
-+++ lustre-release-new/lustre/lmv/lmv_obd.c	2019-09-19 11:55:39.432579797 +0800
+diff -uNr lustre-release/lustre/lmv/lmv_obd.c lustre-2.10.3/lustre/lmv/lmv_obd.c
+--- lustre-release/lustre/lmv/lmv_obd.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/lmv/lmv_obd.c	2019-09-29 17:54:22.000000000 +0800
 @@ -3101,8 +3101,8 @@
  		       " atime %lu ctime %lu, mtime %lu.\n",
  		       PFID(&lsm->lsm_md_oinfo[i].lmo_fid),
@@ -347,9 +350,9 @@ diff -uNr lustre-release/lustre/lmv/lmv_obd.c lustre-release-new/lustre/lmv/lmv_
  	}
  	return 0;
  }
-diff -uNr lustre-release/lustre/mdc/mdc_lib.c lustre-release-new/lustre/mdc/mdc_lib.c
---- lustre-release/lustre/mdc/mdc_lib.c	2019-09-19 11:50:33.935343124 +0800
-+++ lustre-release-new/lustre/mdc/mdc_lib.c	2019-09-19 11:55:40.079582416 +0800
+diff -uNr lustre-release/lustre/mdc/mdc_lib.c lustre-2.10.3/lustre/mdc/mdc_lib.c
+--- lustre-release/lustre/mdc/mdc_lib.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/mdc/mdc_lib.c	2019-09-29 17:54:22.000000000 +0800
 @@ -340,9 +340,9 @@
  	rec->sa_projid = op_data->op_projid;
  	rec->sa_size   = op_data->op_attr.ia_size;
@@ -363,9 +366,9 @@ diff -uNr lustre-release/lustre/mdc/mdc_lib.c lustre-release-new/lustre/mdc/mdc_
  	rec->sa_attr_flags = op_data->op_attr_flags;
  	if ((op_data->op_attr.ia_valid & ATTR_GID) &&
  	     in_group_p(op_data->op_attr.ia_gid))
-diff -uNr lustre-release/lustre/mdc/mdc_reint.c lustre-release-new/lustre/mdc/mdc_reint.c
---- lustre-release/lustre/mdc/mdc_reint.c	2019-09-19 11:50:33.935343124 +0800
-+++ lustre-release-new/lustre/mdc/mdc_reint.c	2019-09-19 11:55:40.867585606 +0800
+diff -uNr lustre-release/lustre/mdc/mdc_reint.c lustre-2.10.3/lustre/mdc/mdc_reint.c
+--- lustre-release/lustre/mdc/mdc_reint.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/mdc/mdc_reint.c	2019-09-29 17:54:22.000000000 +0800
 @@ -132,8 +132,8 @@
  
          if (op_data->op_attr.ia_valid & (ATTR_MTIME | ATTR_CTIME))
@@ -377,9 +380,9 @@ diff -uNr lustre-release/lustre/mdc/mdc_reint.c lustre-release-new/lustre/mdc/md
  	mdc_setattr_pack(req, op_data, ea, ealen);
  
  	req_capsule_set_size(&req->rq_pill, &RMF_ACL, RCL_SERVER,
-diff -uNr lustre-release/lustre/mdt/mdt_handler.c lustre-release-new/lustre/mdt/mdt_handler.c
---- lustre-release/lustre/mdt/mdt_handler.c	2019-09-19 11:50:33.943343157 +0800
-+++ lustre-release-new/lustre/mdt/mdt_handler.c	2019-09-19 11:55:42.097590585 +0800
+diff -uNr lustre-release/lustre/mdt/mdt_handler.c lustre-2.10.3/lustre/mdt/mdt_handler.c
+--- lustre-release/lustre/mdt/mdt_handler.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/mdt/mdt_handler.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1676,7 +1676,7 @@
                          if (ma->ma_valid & MA_INODE &&
                              ma->ma_attr.la_valid & LA_CTIME &&
@@ -389,9 +392,9 @@ diff -uNr lustre-release/lustre/mdt/mdt_handler.c lustre-release-new/lustre/mdt/
                                  child_bits |= MDS_INODELOCK_UPDATE;
                  }
  
-diff -uNr lustre-release/lustre/mdt/mdt_xattr.c lustre-release-new/lustre/mdt/mdt_xattr.c
---- lustre-release/lustre/mdt/mdt_xattr.c	2019-09-19 11:50:33.948343177 +0800
-+++ lustre-release-new/lustre/mdt/mdt_xattr.c	2019-09-19 11:55:42.863593686 +0800
+diff -uNr lustre-release/lustre/mdt/mdt_xattr.c lustre-2.10.3/lustre/mdt/mdt_xattr.c
+--- lustre-release/lustre/mdt/mdt_xattr.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/mdt/mdt_xattr.c	2019-09-29 17:54:22.000000000 +0800
 @@ -398,7 +398,7 @@
  		      "setxattr %s: [object "DFID"] [valid %llu]\n",
  		      mdt_obd_name(info->mti_mdt), xattr_name,
@@ -401,9 +404,9 @@ diff -uNr lustre-release/lustre/mdt/mdt_xattr.c lustre-release-new/lustre/mdt/md
  	}
  	attr->la_valid = LA_CTIME;
  	child = mdt_object_child(obj);
-diff -uNr lustre-release/lustre/obdclass/obdo.c lustre-release-new/lustre/obdclass/obdo.c
---- lustre-release/lustre/obdclass/obdo.c	2019-09-19 11:50:33.967343254 +0800
-+++ lustre-release-new/lustre/obdclass/obdo.c	2019-09-19 11:55:43.527596373 +0800
+diff -uNr lustre-release/lustre/obdclass/obdo.c lustre-2.10.3/lustre/obdclass/obdo.c
+--- lustre-release/lustre/obdclass/obdo.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/obdclass/obdo.c	2019-09-29 17:54:22.000000000 +0800
 @@ -70,19 +70,19 @@
  
  	if (valid & (OBD_MD_FLCTIME | OBD_MD_FLMTIME))
@@ -429,9 +432,9 @@ diff -uNr lustre-release/lustre/obdclass/obdo.c lustre-release-new/lustre/obdcla
                  newvalid |= OBD_MD_FLCTIME;
          }
          if (valid & OBD_MD_FLSIZE) {
-diff -uNr lustre-release/lustre/obdecho/echo_client.c lustre-release-new/lustre/obdecho/echo_client.c
---- lustre-release/lustre/obdecho/echo_client.c	2019-09-19 11:50:33.969343262 +0800
-+++ lustre-release-new/lustre/obdecho/echo_client.c	2019-09-19 11:55:44.216599163 +0800
+diff -uNr lustre-release/lustre/obdecho/echo_client.c lustre-2.10.3/lustre/obdecho/echo_client.c
+--- lustre-release/lustre/obdecho/echo_client.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/obdecho/echo_client.c	2019-09-29 17:54:22.000000000 +0800
 @@ -1614,7 +1614,7 @@
  
          ma->ma_attr.la_mode = mode;
@@ -450,86 +453,79 @@ diff -uNr lustre-release/lustre/obdecho/echo_client.c lustre-release-new/lustre/
          ma->ma_need = MA_INODE;
          ma->ma_valid = 0;
  
-diff -uNr lustre-release/lustre/osc/osc_io.c lustre-release-new/lustre/osc/osc_io.c
---- lustre-release/lustre/osc/osc_io.c	2019-09-19 11:50:33.975343286 +0800
-+++ lustre-release-new/lustre/osc/osc_io.c	2019-09-19 11:55:44.854601745 +0800
-@@ -212,11 +212,14 @@
+diff -uNr lustre-release/lustre/osc/osc_io.c lustre-2.10.3/lustre/osc/osc_io.c
+--- lustre-release/lustre/osc/osc_io.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/osc/osc_io.c	2019-09-29 17:54:22.000000000 +0800
+@@ -212,11 +212,12 @@
  
  	/* Update c/mtime for sync write. LU-7310 */
  	if (crt == CRT_WRITE && qout->pl_nr > 0 && result == 0) {
 -		struct cl_object *obj   = ios->cis_obj;
-+		struct timespec64 ts;
 +        struct cl_object *obj   = ios->cis_obj;
  		struct cl_attr *attr = &osc_env_info(env)->oti_attr;
  
  		cl_object_attr_lock(obj);
 -		attr->cat_mtime = attr->cat_ctime = ktime_get_real_seconds();
 +
-+        ktime_get_real_ts64(&ts);
-+        attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);;
++        attr->cat_mtime = attr->cat_ctime = LTIME_N(CURRENT_TIME);
  		cl_object_attr_update(env, obj, attr, CAT_MTIME | CAT_CTIME);
  		cl_object_attr_unlock(obj);
  	}
-@@ -235,6 +238,7 @@
- static void osc_page_touch_at(const struct lu_env *env,
- 			      struct cl_object *obj, pgoff_t idx, size_t to)
- {
-+        struct timespec64 ts;
-         struct lov_oinfo  *loi  = cl2osc(obj)->oo_oinfo;
-         struct cl_attr    *attr = &osc_env_info(env)->oti_attr;
-         int valid;
-@@ -254,8 +258,9 @@
+@@ -254,8 +255,8 @@
  	CDEBUG(D_INODE, "stripe KMS %sincreasing %llu->%llu %llu\n",
                 kms > loi->loi_kms ? "" : "not ", loi->loi_kms, kms,
                 loi->loi_lvb.lvb_size);
 -
 -	attr->cat_mtime = attr->cat_ctime = ktime_get_real_seconds();
 +    
-+    ktime_get_real_ts64(&ts);
-+	attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);
++	attr->cat_mtime = attr->cat_ctime = LTIME_N(CURRENT_TIME);
  	valid = CAT_MTIME | CAT_CTIME;
  	if (kms > loi->loi_kms) {
  		attr->cat_kms = kms;
-@@ -747,6 +752,7 @@
- static int osc_io_write_start(const struct lu_env *env,
-                               const struct cl_io_slice *slice)
- {
-+    struct timespec64 ts;
- 	struct cl_object *obj   = slice->cis_obj;
- 	struct cl_attr   *attr  = &osc_env_info(env)->oti_attr;
- 	int rc = 0;
-@@ -754,7 +760,9 @@
+@@ -736,7 +737,8 @@
+ 
+ 	if (!slice->cis_io->ci_noatime) {
+ 		cl_object_attr_lock(obj);
+-		attr->cat_atime = ktime_get_real_seconds();
++
++		attr->cat_atime = LTIME_N(CURRENT_TIME);
+ 		rc = cl_object_attr_update(env, obj, attr, CAT_ATIME);
+ 		cl_object_attr_unlock(obj);
+ 	}
+@@ -754,7 +756,8 @@
  
  	OBD_FAIL_TIMEOUT(OBD_FAIL_OSC_DELAY_SETTIME, 1);
  	cl_object_attr_lock(obj);
 -	attr->cat_mtime = attr->cat_ctime = ktime_get_real_seconds();
 +
-+    ktime_get_real_ts64(&ts);
-+	attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);
++	attr->cat_mtime = attr->cat_ctime = LTIME_N(CURRENT_TIME);
  	rc = cl_object_attr_update(env, obj, attr, CAT_MTIME | CAT_CTIME);
  	cl_object_attr_unlock(obj);
  
-diff -uNr lustre-release/lustre/osd-ldiskfs/osd_handler.c lustre-release-new/lustre/osd-ldiskfs/osd_handler.c
---- lustre-release/lustre/osd-ldiskfs/osd_handler.c	2019-09-19 11:50:33.980343306 +0800
-+++ lustre-release-new/lustre/osd-ldiskfs/osd_handler.c	2019-09-19 11:55:45.581604688 +0800
-@@ -2347,13 +2347,13 @@
+diff -uNr lustre-release/lustre/osd-ldiskfs/osd_handler.c lustre-2.10.3/lustre/osd-ldiskfs/osd_handler.c
+--- lustre-release/lustre/osd-ldiskfs/osd_handler.c	2019-09-29 17:55:01.000000000 +0800
++++ lustre-2.10.3/lustre/osd-ldiskfs/osd_handler.c	2019-09-29 17:54:22.000000000 +0800
+@@ -2347,13 +2347,15 @@
  }
  
  static struct timespec *osd_inode_time(const struct lu_env *env,
 -				       struct inode *inode, __u64 seconds)
 +				       struct inode *inode, __u64 nanoseconds)
  {
++    struct timespec64 ts;
  	struct osd_thread_info	*oti = osd_oti_get(env);
  	struct timespec		*t   = &oti->oti_time;
- 
+-
 -	t->tv_sec = seconds;
 -	t->tv_nsec = 0;
-+	t->tv_sec = 0;
-+	t->tv_nsec = nanoseconds;
++    
++    ktime_get_real_ts64(&ts);
++	t->tv_sec = LTIME_S(ts);
++	t->tv_nsec = LTIME_N(ts);
  	*t = timespec_trunc(*t, inode->i_sb->s_time_gran);
  	return t;
  }
-@@ -2366,9 +2366,9 @@
+@@ -2366,9 +2368,9 @@
  			   LA_PROJID | LA_FLAGS | LA_NLINK | LA_RDEV |
  			   LA_BLKSIZE | LA_TYPE;
  
@@ -542,7 +538,7 @@ diff -uNr lustre-release/lustre/osd-ldiskfs/osd_handler.c lustre-release-new/lus
  	attr->la_mode	 = inode->i_mode;
  	attr->la_size	 = i_size_read(inode);
  	attr->la_blocks	 = inode->i_blocks;
-@@ -2970,11 +2970,11 @@
+@@ -2970,11 +2972,11 @@
  
          if (dof->dof_type != DFT_NODE)
                  attr->la_valid &= ~LA_RDEV;

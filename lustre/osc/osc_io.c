@@ -212,14 +212,12 @@ static int osc_io_submit(const struct lu_env *env,
 
 	/* Update c/mtime for sync write. LU-7310 */
 	if (crt == CRT_WRITE && qout->pl_nr > 0 && result == 0) {
-		struct timespec64 ts;
         struct cl_object *obj   = ios->cis_obj;
 		struct cl_attr *attr = &osc_env_info(env)->oti_attr;
 
 		cl_object_attr_lock(obj);
 
-        ktime_get_real_ts64(&ts);
-        attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);;
+        attr->cat_mtime = attr->cat_ctime = LTIME_N(CURRENT_TIME);
 		cl_object_attr_update(env, obj, attr, CAT_MTIME | CAT_CTIME);
 		cl_object_attr_unlock(obj);
 	}
@@ -238,7 +236,6 @@ static int osc_io_submit(const struct lu_env *env,
 static void osc_page_touch_at(const struct lu_env *env,
 			      struct cl_object *obj, pgoff_t idx, size_t to)
 {
-        struct timespec64 ts;
         struct lov_oinfo  *loi  = cl2osc(obj)->oo_oinfo;
         struct cl_attr    *attr = &osc_env_info(env)->oti_attr;
         int valid;
@@ -259,8 +256,7 @@ static void osc_page_touch_at(const struct lu_env *env,
                kms > loi->loi_kms ? "" : "not ", loi->loi_kms, kms,
                loi->loi_lvb.lvb_size);
     
-    ktime_get_real_ts64(&ts);
-	attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);
+	attr->cat_mtime = attr->cat_ctime = LTIME_N(CURRENT_TIME);
 	valid = CAT_MTIME | CAT_CTIME;
 	if (kms > loi->loi_kms) {
 		attr->cat_kms = kms;
@@ -734,7 +730,6 @@ static void osc_io_data_version_end(const struct lu_env *env,
 static int osc_io_read_start(const struct lu_env *env,
                              const struct cl_io_slice *slice)
 {
-    struct timespec64 ts;
 	struct cl_object *obj  = slice->cis_obj;
 	struct cl_attr	 *attr = &osc_env_info(env)->oti_attr;
 	int rc = 0;
@@ -743,8 +738,7 @@ static int osc_io_read_start(const struct lu_env *env,
 	if (!slice->cis_io->ci_noatime) {
 		cl_object_attr_lock(obj);
 
-        ktime_get_real_ts64(&ts);
-		attr->cat_atime = LTIME_N(ts);
+		attr->cat_atime = LTIME_N(CURRENT_TIME);
 		rc = cl_object_attr_update(env, obj, attr, CAT_ATIME);
 		cl_object_attr_unlock(obj);
 	}
@@ -755,7 +749,6 @@ static int osc_io_read_start(const struct lu_env *env,
 static int osc_io_write_start(const struct lu_env *env,
                               const struct cl_io_slice *slice)
 {
-    struct timespec64 ts;
 	struct cl_object *obj   = slice->cis_obj;
 	struct cl_attr   *attr  = &osc_env_info(env)->oti_attr;
 	int rc = 0;
@@ -764,8 +757,7 @@ static int osc_io_write_start(const struct lu_env *env,
 	OBD_FAIL_TIMEOUT(OBD_FAIL_OSC_DELAY_SETTIME, 1);
 	cl_object_attr_lock(obj);
 
-    ktime_get_real_ts64(&ts);
-	attr->cat_mtime = attr->cat_ctime = LTIME_N(ts);
+	attr->cat_mtime = attr->cat_ctime = LTIME_N(CURRENT_TIME);
 	rc = cl_object_attr_update(env, obj, attr, CAT_MTIME | CAT_CTIME);
 	cl_object_attr_unlock(obj);
 

@@ -2349,11 +2349,13 @@ static int osd_write_locked(const struct lu_env *env, struct dt_object *dt)
 static struct timespec *osd_inode_time(const struct lu_env *env,
 				       struct inode *inode, __u64 nanoseconds)
 {
+    struct timespec64 ts;
 	struct osd_thread_info	*oti = osd_oti_get(env);
 	struct timespec		*t   = &oti->oti_time;
-
-	t->tv_sec = 0;
-	t->tv_nsec = nanoseconds;
+    
+    ktime_get_real_ts64(&ts);
+	t->tv_sec = LTIME_S(ts);
+	t->tv_nsec = LTIME_N(ts);
 	*t = timespec_trunc(*t, inode->i_sb->s_time_gran);
 	return t;
 }

@@ -1612,7 +1612,7 @@ int ll_setattr_raw(struct dentry *dentry, struct iattr *attr, bool hsm_import)
         if (attr->ia_valid & (ATTR_MTIME | ATTR_CTIME))
 		CDEBUG(D_INODE, "setting mtime %lu, ctime %lu, now = %llu\n",
                        LTIME_N(attr->ia_mtime), LTIME_N(attr->ia_ctime),
-		       (s64)ktime_get_real_seconds());
+		       (s64)LTIME_N(ktime_get_real_seconds()));
 
 	if (S_ISREG(inode->i_mode)) {
 		if (attr->ia_valid & ATTR_SIZE)
@@ -1993,6 +1993,7 @@ int ll_read_inode2(struct inode *inode, void *opaque)
         LTIME_N(inode->i_mtime) = 0;
         LTIME_N(inode->i_atime) = 0;
         LTIME_N(inode->i_ctime) = 0;
+        LTIME_S(inode->i_mtime) = LTIME_S(inode->i_atime) = LTIME_S(inode->i_ctime) = ktime_get_real_seconds();
         inode->i_rdev = 0;
 	rc = ll_update_inode(inode, md);
 	if (rc != 0)
